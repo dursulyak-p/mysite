@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMW Parts Catalog</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .catalog-container, .add-part-form {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 400px;
+            margin-bottom: 20px;
+        }
+        .add-part-form input, .add-part-form select, .add-part-form button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .add-part-form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .add-part-form button:hover {
+            background-color: #0056b3;
+        }
+        .part-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .part-card h3 {
+            margin: 0 0 5px 0;
+        }
+        .part-card p {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>BMW Parts Local Catalog</h1>
+
+<div class="add-part-form">
+    <h2>Add a new part</h2>
+    <input type="text" id="partName" placeholder="Part Name">
+    <input type="text" id="carModel" placeholder="Car Model">
+    <select id="status">
+        <option value="Available">Available</option>
+        <option value="Out of Stock">Out of Stock</option>
+        <option value="Reserved">Reserved</option>
+    </select>
+    <input type="number" id="price" placeholder="Price" min="0">
+    <button id="addPartBtn">Add Part</button>
+</div>
+
+<div class="catalog-container" id="catalog">
+    <h2>Parts Catalog</h2>
+    <!-- Parts will appear here -->
+</div>
+
+<script>
+    const addBtn = document.getElementById('addPartBtn');
+    const catalog = document.getElementById('catalog');
+
+    // Получаем данные из localStorage или создаем пустой массив
+    let parts = JSON.parse(localStorage.getItem('bmwParts')) || [];
+
+    // Функция для отображения каталога
+    function renderCatalog() {
+        catalog.innerHTML = '<h2>Parts Catalog</h2>';
+        parts.forEach((part, index) => {
+            const partCard = document.createElement('div');
+            partCard.classList.add('part-card');
+            partCard.innerHTML = `
+                <h3>${part.name}</h3>
+                <p><strong>Car Model:</strong> ${part.model}</p>
+                <p><strong>Status:</strong> ${part.status}</p>
+                <p><strong>Price:</strong> $${parseFloat(part.price).toFixed(2)}</p>
+                <button onclick="deletePart(${index})">Delete</button>
+            `;
+            catalog.appendChild(partCard);
+        });
+    }
+
+    // Функция для добавления новой детали
+    addBtn.addEventListener('click', () => {
+        const partName = document.getElementById('partName').value.trim();
+        const carModel = document.getElementById('carModel').value.trim();
+        const status = document.getElementById('status').value;
+        const price = document.getElementById('price').value;
+
+        if (!partName || !carModel || !price) {
+            alert('Please fill all fields');
+            return;
+        }
+
+        parts.push({ name: partName, model: carModel, status: status, price: price });
+        localStorage.setItem('bmwParts', JSON.stringify(parts));
+
+        // Очистка формы
+        document.getElementById('partName').value = '';
+        document.getElementById('carModel').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('status').value = 'Available';
+
+        renderCatalog();
+    });
+
+    // Функция для удаления детали
+    function deletePart(index) {
+        if(confirm('Are you sure you want to delete this part?')) {
+            parts.splice(index, 1);
+            localStorage.setItem('bmwParts', JSON.stringify(parts));
+            renderCatalog();
+        }
+    }
+
+    // Первоначальный рендер
+    renderCatalog();
+</script>
+
+</body>
+</html>
